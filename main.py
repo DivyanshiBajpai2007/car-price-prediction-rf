@@ -59,3 +59,45 @@ plt.tight_layout()
 plt.show()
 
 print(corr)
+
+
+
+#Feature Engineering
+
+df = df.drop_duplicates()
+
+Q1 = df['Kms_Driven'].quantile(0.25)
+Q3 = df['Kms_Driven'].quantile(0.75)
+IQR = Q3 - Q1
+upper_limit = Q3 + 1.5 * IQR
+
+print("Upper limit for Kms_Driven:", upper_limit)
+print("Rows above limit:", (df['Kms_Driven'] > upper_limit).sum())
+
+df['Kms_Driven'] = df['Kms_Driven'].clip(upper=upper_limit)
+
+
+df = df.reset_index(drop=True)
+
+df['Car_Age'] = 2025 - df['Year']
+
+
+df['Mileage_per_Year'] = df['Kms_Driven'] / (df['Car_Age'] + 1)
+
+
+premium_keywords = [
+    'innova', 'fortuner', 'corolla', 'camry', 'land cruiser', 'etios',  # Toyota
+    'city', 'brio', 'amaze', 'jazz', 'cb ', 'cbr', 'karizma', 'activa', 'cb-',  # Honda
+    'i20', 'i10', 'eon', 'xcent', 'verna', 'creta', 'elantra'  # Hyundai
+]
+
+df['Premium_Brand'] = df['Car_Name'].str.lower().apply(
+    lambda name: 1 if any(keyword in name for keyword in premium_keywords) else 0
+)
+
+
+median_kms = df['Kms_Driven'].median()
+df['High_Mileage'] = (df['Kms_Driven'] > median_kms).astype(int)
+
+
+print(df[['Car_Name', 'Car_Age', 'Mileage_per_Year', 'Premium_Brand', 'High_Mileage']].head(10))
