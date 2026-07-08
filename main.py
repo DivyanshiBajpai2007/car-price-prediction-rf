@@ -95,9 +95,43 @@ df['Premium_Brand'] = df['Car_Name'].str.lower().apply(
     lambda name: 1 if any(keyword in name for keyword in premium_keywords) else 0
 )
 
-
 median_kms = df['Kms_Driven'].median()
 df['High_Mileage'] = (df['Kms_Driven'] > median_kms).astype(int)
 
 
 print(df[['Car_Name', 'Car_Age', 'Mileage_per_Year', 'Premium_Brand', 'High_Mileage']].head(10))
+
+
+
+#Encoding
+from sklearn.preprocessing import LabelEncoder
+
+
+
+le = LabelEncoder()
+df['Car_Name_Encoded'] = le.fit_transform(df['Car_Name'])
+
+
+df = pd.get_dummies(df, columns=['Fuel_Type', 'Seller_Type', 'Transmission'], drop_first=True)
+
+# Quick check
+print(df.head())
+print("Columns after encoding:", df.columns.tolist())
+
+
+ #test split
+
+from sklearn.model_selection import train_test_split
+X = df.drop(columns=['Selling_Price', 'Car_Name'])  # drop target + original text column
+y = df['Selling_Price']
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+print("X_train shape:", X_train.shape)
+print("X_test shape:", X_test.shape)
+print("y_train shape:", y_train.shape)
+print("y_test shape:", y_test.shape)
+print(X_train.columns.tolist())
